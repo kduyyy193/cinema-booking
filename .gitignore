@@ -1,0 +1,10 @@
+storage/cinema.sqlite
+storage/cinema.sqlite-wal
+storage/cinema.sqlite-shm
+storage/logs/*.log
+public/uploads/*
+!public/uploads/.gitkeep
+
+# nginx local HTTPS
+deploy/nginx/certs/*
+!deploy/nginx/certs/.gitkeep
