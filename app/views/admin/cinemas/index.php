@@ -27,7 +27,7 @@
                     <td class="text-end text-nowrap">
                         <button class="btn btn-sm btn-outline-info" form="<?= $fid ?>">Lưu</button>
                         <a class="btn btn-sm btn-outline-light" href="/admin/rooms?cinema_id=<?= (int)$c['id'] ?>">Phòng</a>
-                        <button class="btn btn-sm btn-outline-warning" form="<?= $fid ?>" formaction="/admin/cinemas/status" formnovalidate><?= $c['status'] === 'active' ? 'Tắt' : 'Bật' ?></button>
+                        <button class="btn btn-sm btn-outline-warning" form="<?= $fid ?>" formaction="/admin/cinemas/status" formnovalidate data-confirm="<?= $c['status'] === 'active' ? 'Tắt rạp này? Rạp sẽ không hiển thị với khách.' : 'Bật lại rạp này?' ?>" data-confirm-button="<?= $c['status'] === 'active' ? 'Tắt' : 'Bật' ?>"><?= $c['status'] === 'active' ? 'Tắt' : 'Bật' ?></button>
                     </td>
                 </tr>
             <?php endforeach; ?>

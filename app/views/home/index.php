@@ -1,15 +1,38 @@
-<section class="hero">
-    <div class="container">
-        <?php if ($featured): ?>
-            <h1 class="display-6">Xem phim yêu thích trên màn ảnh lớn</h1>
-            <h5 class="mt-3"><?= e($featured['title']) ?></h5>
-            <p><?= e(mb_strimwidth((string)$featured['description'], 0, 200, '…')) ?></p>
-            <a href="/movie?id=<?= (int)$featured['id'] ?>#showtimes" class="btn btn-buy px-4 py-2">Mua vé</a>
-            <?php if ($featured['trailer_url']): ?><a href="<?= e($featured['trailer_url']) ?>" target="_blank" rel="noopener" class="btn btn-link text-white text-decoration-none ms-2"><i class="bi bi-play-circle fs-4 align-middle"></i> Xem trailer</a><?php endif; ?>
-        <?php else: ?>
-            <h1 class="display-6">Xem phim yêu thích trên màn ảnh lớn</h1>
+<section id="hero-carousel" class="carousel slide carousel-fade hero-carousel" data-bs-ride="carousel" data-bs-interval="6000" aria-label="Phim nổi bật">
+    <?php if (count($slides) > 1): ?>
+        <div class="carousel-indicators">
+            <?php foreach ($slides as $i => $m): ?>
+                <button type="button" data-bs-target="#hero-carousel" data-bs-slide-to="<?= $i ?>" class="<?= $i === 0 ? 'active' : '' ?>" <?= $i === 0 ? 'aria-current="true"' : '' ?> aria-label="Phim <?= $i + 1 ?>"></button>
+            <?php endforeach; ?>
+        </div>
+    <?php endif; ?>
+    <div class="carousel-inner">
+        <?php if (!$slides): ?>
+            <div class="carousel-item active"><div class="hero"><div class="container"><h1 class="display-6">Xem phim yêu thích trên màn ảnh lớn</h1></div></div></div>
         <?php endif; ?>
+        <?php foreach ($slides as $i => $m): ?>
+            <div class="carousel-item <?= $i === 0 ? 'active' : '' ?>">
+                <div class="hero">
+                    <div class="container hero-grid">
+                        <div>
+                            <h1 class="display-6">Xem phim yêu thích trên màn ảnh lớn</h1>
+                            <h5 class="mt-3"><?= e($m['title']) ?></h5>
+                            <p><?= e(mb_strimwidth((string)$m['description'], 0, 200, '…')) ?></p>
+                            <a href="/movie?id=<?= (int)$m['id'] ?>#showtimes" class="btn btn-buy px-4 py-2">Mua vé</a>
+                            <?php if ($m['trailer_url']): ?><a href="<?= e($m['trailer_url']) ?>" target="_blank" rel="noopener" class="btn btn-link text-white text-decoration-none ms-2"><i class="bi bi-play-circle"></i> Trailer</a><?php endif; ?>
+                        </div>
+                        <?php if ($m['poster']): ?>
+                            <img class="hero-poster d-none d-md-block" src="/uploads/<?= e($m['poster']) ?>" alt="Poster phim <?= e($m['title']) ?>">
+                        <?php endif; ?>
+                    </div>
+                </div>
+            </div>
+        <?php endforeach; ?>
     </div>
+    <?php if (count($slides) > 1): ?>
+        <button class="carousel-control-prev" type="button" data-bs-target="#hero-carousel" data-bs-slide="prev"><span class="carousel-control-prev-icon" aria-hidden="true"></span><span class="visually-hidden">Phim trước</span></button>
+        <button class="carousel-control-next" type="button" data-bs-target="#hero-carousel" data-bs-slide="next"><span class="carousel-control-next-icon" aria-hidden="true"></span><span class="visually-hidden">Phim sau</span></button>
+    <?php endif; ?>
 </section>
 
 <div class="container">

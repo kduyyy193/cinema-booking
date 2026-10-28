@@ -36,7 +36,7 @@
                 <?php if (!$actions): ?><p class="text-muted-2 small mb-0">Đơn ở trạng thái này không còn thao tác hợp lệ.</p><?php endif; ?>
                 <div class="d-flex flex-column gap-2">
                     <?php foreach ($actions as $status => $label): ?>
-                        <form method="post" action="/admin/bookings/status" onsubmit="return confirm('<?= e($label) ?>?')">
+                        <form method="post" action="/admin/bookings/status" data-confirm="<?= e($label) ?>?" data-confirm-button="<?= e($label) ?>">
                             <?= csrfField() ?><input type="hidden" name="id" value="<?= (int)$booking['id'] ?>"><input type="hidden" name="status" value="<?= e($status) ?>">
                             <button class="btn w-100 btn-<?= $status === 'cancelled' ? 'outline-danger' : 'primary' ?>"><?= e($label) ?></button>
                         </form>

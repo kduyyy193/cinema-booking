@@ -1,6 +1,6 @@
 <?php
 $footerUser = currentUser();
-$footerCinemas = Cinema::all();
+$footerCinemas = \App\Models\Cinema::all();
 ?>
 <footer class="site-footer no-print">
     <div class="container">

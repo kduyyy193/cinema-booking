@@ -29,7 +29,7 @@
                     <td class="text-end text-nowrap">
                         <?php if ($s['status'] === 'scheduled'): ?>
                             <a class="btn btn-sm btn-outline-info" href="/admin/showtimes/edit?id=<?= (int)$s['id'] ?>">Sửa</a>
-                            <form class="d-inline" method="post" action="/admin/showtimes/cancel" onsubmit="return confirm('Hủy suất chiếu? Các đơn liên quan sẽ bị hủy và hoàn tiền giả lập.')">
+                            <form class="d-inline" method="post" action="/admin/showtimes/cancel" data-confirm="Hủy suất chiếu? Các đơn liên quan sẽ bị hủy và hoàn tiền giả lập." data-confirm-button="Hủy suất">
                                 <?= csrfField() ?><input type="hidden" name="id" value="<?= (int)$s['id'] ?>"><button class="btn btn-sm btn-outline-danger">Hủy suất</button></form>
                         <?php endif; ?>
                     </td>

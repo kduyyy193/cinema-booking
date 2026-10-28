@@ -31,7 +31,7 @@
                     <td><?= e(formatDateTime($u['created_at'], 'd/m/Y')) ?></td>
                     <td class="text-end">
                         <?php if (!$self): ?>
-                            <form method="post" action="/admin/users/status" onsubmit="return confirm('<?= $u['status'] === 'active' ? 'Khóa' : 'Mở khóa' ?> tài khoản này?')">
+                            <form method="post" action="/admin/users/status" data-confirm="<?= $u['status'] === 'active' ? 'Khóa' : 'Mở khóa' ?> tài khoản này?" data-confirm-button="<?= $u['status'] === 'active' ? 'Khóa' : 'Mở khóa' ?>">
                                 <?= csrfField() ?><input type="hidden" name="id" value="<?= (int)$u['id'] ?>">
                                 <button class="btn btn-sm btn-outline-<?= $u['status'] === 'active' ? 'danger' : 'success' ?>"><?= $u['status'] === 'active' ? 'Khóa' : 'Mở khóa' ?></button>
                             </form>

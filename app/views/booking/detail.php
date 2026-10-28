@@ -35,7 +35,7 @@
                 <div class="d-flex gap-2 flex-wrap">
                     <?php if ($canPay): ?><a class="btn btn-buy" href="/payment?booking_id=<?= (int)$booking['id'] ?>">Thanh toán</a><?php endif; ?>
                     <?php if ($canCancel): ?>
-                        <form method="post" action="/booking/cancel" data-confirm="Bạn chắc chắn muốn hủy vé này?">
+                        <form method="post" action="/booking/cancel" data-confirm="Bạn chắc chắn muốn hủy vé này? Số tiền được hoàn lại (giả lập)." data-confirm-button="Hủy vé">
                             <?= csrfField() ?><input type="hidden" name="booking_id" value="<?= (int)$booking['id'] ?>">
                             <button class="btn btn-outline-danger">Hủy vé</button>
                         </form>

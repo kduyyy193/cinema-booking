@@ -19,7 +19,7 @@
                     </td>
                     <td><?= (int)$g['movie_count'] ?></td>
                     <td class="text-end">
-                        <form method="post" action="/admin/genres/delete" onsubmit="return confirm('Xóa thể loại này?')">
+                        <form method="post" action="/admin/genres/delete" data-confirm="Xóa thể loại này?" data-confirm-button="Xóa">
                             <?= csrfField() ?><input type="hidden" name="id" value="<?= (int)$g['id'] ?>">
                             <button class="btn btn-sm btn-outline-danger">Xóa</button>
                         </form>

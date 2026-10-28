@@ -27,7 +27,7 @@
                         <a class="btn btn-sm btn-outline-info" href="/admin/movies/edit?id=<?= (int)$m['id'] ?>">Sửa</a>
                         <form class="d-inline" method="post" action="/admin/movies/status"><?= csrfField() ?><input type="hidden" name="id" value="<?= (int)$m['id'] ?>">
                             <button class="btn btn-sm btn-outline-warning"><?= $m['status'] === 'hidden' ? 'Hiện' : 'Ẩn' ?></button></form>
-                        <form class="d-inline" method="post" action="/admin/movies/delete" onsubmit="return confirm('Xóa phim này?')"><?= csrfField() ?><input type="hidden" name="id" value="<?= (int)$m['id'] ?>">
+                        <form class="d-inline" method="post" action="/admin/movies/delete" data-confirm="Xóa phim này?" data-confirm-button="Xóa"><?= csrfField() ?><input type="hidden" name="id" value="<?= (int)$m['id'] ?>">
                             <button class="btn btn-sm btn-outline-danger">Xóa</button></form>
                     </td>
                 </tr>
