@@ -46,9 +46,10 @@ Khách xem phim, chọn suất chiếu và ghế, đặt vé rồi thanh toán b
 
 ## ⚙️ Chạy nhanh
 
-Yêu cầu: **PHP 8.1+** với các extension `pdo_sqlite`, `sqlite3`, `mbstring`, `fileinfo`, và có Internet (giao diện nạp Bootstrap, QR, biểu đồ từ CDN). Chưa có PHP hoặc gặp lỗi thì xem [hướng dẫn từng bước cho Windows](#-hướng-dẫn-chạy-từng-bước-windows) hoặc [Linux/macOS](#-chạy-trên-linuxmacos) bên dưới.
+Yêu cầu: **PHP 8.1+** với các extension `pdo_sqlite`, `sqlite3`, `mbstring`, `fileinfo`, **Composer** (nạp lớp PSR-4), và có Internet (giao diện nạp Bootstrap, QR, biểu đồ từ CDN). Chưa có PHP hoặc gặp lỗi thì xem [hướng dẫn từng bước cho Windows](#-hướng-dẫn-chạy-từng-bước-windows) hoặc [Linux/macOS](#-chạy-trên-linuxmacos) bên dưới.
 
 ```
+composer install
 php database/seed.php
 php -S localhost:8000 -t public public/index.php
 ```
@@ -62,6 +63,9 @@ Mở **http://localhost:8000**
 - Thẻ test: `4242 4242 4242 4242` thanh toán thành công, `4000 0000 0000 0002` bị từ chối (hạn trong tương lai, CVV 3 số).
 - Thanh toán gửi webhook có chữ ký về `/webhooks/mock-payment`. Máy chủ `php -S` chạy một tiến trình (luôn như vậy trên Windows) không tự gọi lại chính nó được, nên khi đó ứng dụng xử lý sự kiện trực tiếp trong tiến trình với cùng một đoạn mã. Trên Linux/macOS đặt `PHP_CLI_SERVER_WORKERS=4` để webhook đi qua HTTP thật.
 - Đơn chờ thanh toán quá hạn được giải phóng ghế mỗi lần mở trang chọn ghế, thanh toán, vé của tôi và trang admin. Giao dịch kẹt ở `processing` quá 5 phút sau hạn giữ ghế bị chuyển `failed` để ghế không bị giữ mãi.
+- Mã nguồn dùng namespace `App\` theo chuẩn PSR-4, nạp bằng Composer (`composer.json`). Lớp mới đặt đúng thư mục: `App\Models\Movie` nằm ở `app/Models/Movie.php`.
+- Trạng thái thanh toán cập nhật bằng SSE (`/payment/stream`) khi máy chủ xử lý được nhiều yêu cầu cùng lúc (nginx + PHP-FPM, hoặc `PHP_CLI_SERVER_WORKERS=4` trên Linux/macOS). `php -S` một tiến trình (Windows) tự chuyển sang truy vấn định kỳ để không bị treo; ép chế độ bằng biến môi trường `CINEBOOKING_WATCH_MODE=sse` hoặc `poll`.
+- HTTP caching: trang công khai gửi `ETag` và `Cache-Control: private, no-cache` (trả `304` khi chưa đổi), trang cá nhân và quản trị gửi `no-store`; poster và tệp trong `/assets` có `ETag`, `Last-Modified` và `Cache-Control: public, max-age=604800`. Cấu hình nginx trong `deploy/nginx/cinebooking.conf` phục vụ các tệp tĩnh này trực tiếp và tắt đệm cho SSE.
 
 ## 🚀 Hướng dẫn chạy từng bước (Windows)
 
@@ -91,10 +95,11 @@ php -m | Select-String "sqlite|mbstring|fileinfo"
 
 Kết quả phải có đủ 4 dòng: `fileinfo`, `mbstring`, `pdo_sqlite`, `sqlite3`. Nếu báo lỗi `could not find driver` khi chạy seed, nghĩa là bước này chưa đạt. Dùng PHP cài kiểu khác (XAMPP, tải zip từ windows.php.net) thì sửa `php.ini` tương ứng theo cách tương tự.
 
-**Bước 3. Vào thư mục project và tạo database mẫu:**
+**Bước 3. Cài Composer (https://getcomposer.org/download/), vào thư mục project, cài autoload và tạo database mẫu:**
 
 ```powershell
 cd đường\dẫn\tới\cinema-booking
+composer install
 php database/seed.php
 ```
 
@@ -122,12 +127,13 @@ php -S localhost:8000 -t public public/index.php
 # Ubuntu/Debian
 sudo apt install php-cli php-sqlite3 php-mbstring
 # macOS (Homebrew)
-brew install php
+brew install php composer
 
 php -v                       # cần 8.1 trở lên
 php -m | grep -Ei "sqlite|mbstring|fileinfo"
 
 cd /đường/dẫn/tới/cinema-booking
+composer install
 php database/seed.php
 PHP_CLI_SERVER_WORKERS=4 php -S localhost:8000 -t public public/index.php
 ```
@@ -148,6 +154,7 @@ Sau khi sửa, kiểm tra bằng `php -m` rồi làm tiếp từ Bước 3.
 | `php` không được nhận ra | Đóng và mở lại PowerShell sau khi cài, hoặc kiểm tra PHP đã nằm trong `PATH` |
 | `could not find driver` | Chưa bật `pdo_sqlite`, làm lại Bước 2 |
 | `Database chưa được tạo` | Chạy `php database/seed.php` (Bước 3) |
+| `Failed opening required ... vendor/autoload.php` | Chưa chạy `composer install` (Bước 3) |
 | Cổng 8000 đang bận | Đổi cổng, ví dụ `php -S localhost:8080 -t public public/index.php` |
 | Không tải được giao diện hoặc mã QR | Máy cần có Internet vì Bootstrap, biểu tượng, QR và biểu đồ nạp từ CDN |
 | Thanh toán thẻ xong mà trang không đổi | Tải lại trang. Trên Windows server chạy một tiến trình, ứng dụng tự xử lý webhook nội bộ nên kết quả có ngay sau khi gửi form |
