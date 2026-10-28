@@ -14,7 +14,7 @@ function verifyMockWebhookSignature(string $rawBody, string $signature, int $tim
 
 function generatePaymentQr(string $transactionCode): string
 {
-    $payment = Payment::findByTransactionCode($transactionCode);
+    $payment = \App\Models\Payment::findByTransactionCode($transactionCode);
     $amount = $payment ? (int)$payment['amount'] : 0;
     return 'CINEBOOKING|' . $transactionCode . '|' . $amount;
 }
@@ -58,6 +58,13 @@ function webhookLoopbackAvailable(): bool
     return PHP_OS_FAMILY !== 'Windows' && (int)getenv('PHP_CLI_SERVER_WORKERS') > 1;
 }
 
+function paymentWatchMode(): string
+{
+    $mode = (string)config('payment_watch_mode');
+    if ($mode === 'sse' || $mode === 'poll') return $mode;
+    return webhookLoopbackAvailable() ? 'sse' : 'poll';
+}
+
 function sendMockWebhook(string $type, array $payment): bool
 {
     $raw = json_encode([
@@ -68,7 +75,7 @@ function sendMockWebhook(string $type, array $payment): bool
         'created_at' => nowString(),
     ], JSON_UNESCAPED_UNICODE);
     if (!webhookLoopbackAvailable()) {
-        [$code] = WebhookController::processRaw($raw);
+        [$code] = \App\Controllers\WebhookController::processRaw($raw);
         return $code === 200;
     }
     $timestamp = time();
@@ -82,6 +89,6 @@ function sendMockWebhook(string $type, array $payment): bool
     $response = @file_get_contents(webhookBaseUrl() . '/webhooks/mock-payment', false, $context);
     if ($response !== false) return true;
     logApplicationError('Webhook HTTP thất bại, xử lý trực tiếp trong tiến trình.');
-    [$code] = WebhookController::processRaw($raw);
+    [$code] = \App\Controllers\WebhookController::processRaw($raw);
     return $code === 200;
 }

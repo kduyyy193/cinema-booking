@@ -3,7 +3,7 @@ $errors = $form['errors'] ?? [];
 $processing = $payment['status'] === 'processing';
 $seatLabels = implode(', ', array_map(fn($s) => $s['seat_row'] . $s['seat_number'], $seats));
 ?>
-<div class="container-xl py-4" id="pay-root" data-transaction="<?= e($payment['transaction_code']) ?>" data-status="<?= e($payment['status']) ?>" data-expires="<?= (int)strtotime($booking['expires_at']) ?>">
+<div class="container-xl py-4" id="pay-root" data-mode="<?= e($watchMode ?? 'poll') ?>" data-transaction="<?= e($payment['transaction_code']) ?>" data-status="<?= e($payment['status']) ?>" data-expires="<?= (int)strtotime($booking['expires_at']) ?>">
     <div class="row g-3">
         <div class="col-lg-4">
             <div class="pay-card">

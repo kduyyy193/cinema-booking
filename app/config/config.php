@@ -11,4 +11,5 @@ return [
     'log_path'         => BASE_PATH . '/storage/logs/app.log',
     'webhook_secret'   => 'demo-secret-change-me',
     'webhook_base_url' => null,
+    'payment_watch_mode' => getenv('CINEBOOKING_WATCH_MODE') ?: 'auto',
 ];

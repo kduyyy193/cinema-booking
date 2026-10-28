@@ -9,6 +9,7 @@
     var qrBox = document.getElementById('qr-box');
     var form = document.getElementById('card-form');
     var polling = null;
+    var source = null;
 
     if (qrBox && window.QRCode) {
         new QRCode(qrBox, { text: qrBox.dataset.qr, width: 180, height: 180 });
@@ -21,32 +22,44 @@
         var left = Math.max(0, Math.floor((expiresAt - Date.now()) / 1000));
         countdown.textContent = pad(Math.floor(left / 60)) + ':' + pad(left % 60);
         if (left === 0) {
-            stopPolling();
+            stopWatching();
             window.location.reload();
         }
     }
 
-    function stopPolling() {
+    function stopWatching() {
         if (polling) { clearInterval(polling); polling = null; }
+        if (source) { source.close(); source = null; }
+    }
+
+    function handle(data) {
+        if (data.status === 'success' || data.booking_status === 'confirmed') {
+            stopWatching();
+            window.location.href = '/payment/success?code=' + encodeURIComponent(data.booking_code);
+        } else if (data.status === 'failed' || data.status === 'expired') {
+            stopWatching();
+            window.location.reload();
+        }
     }
 
     function poll() {
         fetch('/payment/status?transaction_code=' + encodeURIComponent(transaction), { credentials: 'same-origin' })
             .then(function (response) { return response.json(); })
-            .then(function (data) {
-                if (data.status === 'success' || data.booking_status === 'confirmed') {
-                    stopPolling();
-                    window.location.href = '/payment/success?code=' + encodeURIComponent(data.booking_code);
-                } else if (data.status === 'failed' || data.status === 'expired') {
-                    stopPolling();
-                    window.location.reload();
-                }
-            })
+            .then(handle)
             .catch(function () {});
     }
 
     function startPolling() {
         if (!polling) polling = setInterval(poll, 1000);
+    }
+
+    function watchWithSse() {
+        source = new EventSource('/payment/stream?transaction_code=' + encodeURIComponent(transaction));
+        source.addEventListener('status', function (event) { handle(JSON.parse(event.data)); });
+        source.addEventListener('done', function () { if (source) { source.close(); source = null; } });
+        source.onerror = function () {
+            if (source && source.readyState === EventSource.CLOSED) { source = null; startPolling(); }
+        };
     }
 
     if (form) {
@@ -69,7 +82,10 @@
         });
     }
 
-    if (status === 'processing') startPolling();
+    if (status === 'processing') {
+        if (root.dataset.mode === 'sse' && window.EventSource) watchWithSse();
+        else startPolling();
+    }
     tick();
     setInterval(tick, 1000);
 })();
