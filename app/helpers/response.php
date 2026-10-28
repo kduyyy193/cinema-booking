@@ -35,7 +35,72 @@ function render(string $view, array $data = [], string $layout = 'main'): void
     ob_start();
     require BASE_PATH . "/app/views/$view.php";
     $content = ob_get_clean();
+    ob_start();
     require BASE_PATH . "/app/views/layouts/$layout.php";
+    $html = ob_get_clean();
+    applyPageCaching($html);
+    echo $html;
+}
+
+function sendConditionalHeaders(string $etag, ?int $lastModified = null): void
+{
+    header('ETag: ' . $etag);
+    if ($lastModified !== null) {
+        header('Last-Modified: ' . gmdate('D, d M Y H:i:s', $lastModified) . ' GMT');
+    }
+    $ifNoneMatch = $_SERVER['HTTP_IF_NONE_MATCH'] ?? null;
+    $notModified = false;
+    if ($ifNoneMatch !== null) {
+        $strip = static fn(string $tag): string => preg_replace('/^W\//', '', trim($tag));
+        $sent = array_map($strip, explode(',', $ifNoneMatch));
+        $notModified = trim($ifNoneMatch) === '*' || in_array($strip($etag), $sent, true);
+    } elseif ($lastModified !== null && isset($_SERVER['HTTP_IF_MODIFIED_SINCE'])) {
+        $since = strtotime((string)$_SERVER['HTTP_IF_MODIFIED_SINCE']);
+        $notModified = $since !== false && $lastModified <= $since;
+    }
+    if ($notModified) {
+        http_response_code(304);
+        exit;
+    }
+}
+
+function applyPageCaching(string $html): void
+{
+    $cacheable = ['/', '/movies', '/movie', '/showtimes', '/select-showtime'];
+    $path = rtrim((string)parse_url($_SERVER['REQUEST_URI'] ?? '/', PHP_URL_PATH), '/') ?: '/';
+    if (in_array($_SERVER['REQUEST_METHOD'] ?? 'GET', ['GET', 'HEAD'], true) && http_response_code() === 200 && in_array($path, $cacheable, true)) {
+        header('Cache-Control: private, no-cache');
+        sendConditionalHeaders('W/"' . md5($html) . '"');
+        return;
+    }
+    header('Cache-Control: no-store');
+}
+
+function assetUrl(string $path): string
+{
+    $path = ltrim($path, '/');
+    $file = BASE_PATH . '/public/assets/' . $path;
+    return '/assets/' . $path . '?v=' . (is_file($file) ? filemtime($file) : 0);
+}
+
+function serveStaticFile(string $file): void
+{
+    $types = ['css' => 'text/css; charset=utf-8', 'js' => 'application/javascript; charset=utf-8', 'jpg' => 'image/jpeg',
+              'jpeg' => 'image/jpeg', 'png' => 'image/png', 'webp' => 'image/webp', 'gif' => 'image/gif', 'svg' => 'image/svg+xml',
+              'ico' => 'image/x-icon', 'woff2' => 'font/woff2', 'map' => 'application/json'];
+    $ext = strtolower(pathinfo($file, PATHINFO_EXTENSION));
+    if (!isset($types[$ext])) {
+        renderError(404, 'Không tìm thấy trang.');
+        return;
+    }
+    $modified = (int)filemtime($file);
+    $size = (int)filesize($file);
+    header('Content-Type: ' . $types[$ext]);
+    header('Cache-Control: public, max-age=604800');
+    header('X-Content-Type-Options: nosniff');
+    sendConditionalHeaders('"' . dechex($modified) . '-' . dechex($size) . '"', $modified);
+    header('Content-Length: ' . $size);
+    readfile($file);
 }
 
 function renderError(int $code, string $message = ''): void
@@ -47,6 +112,7 @@ function renderError(int $code, string $message = ''): void
 
 function jsonResponse(array $data, int $code = 200): never
 {
+    header('Cache-Control: no-store');
     http_response_code($code);
     header('Content-Type: application/json; charset=utf-8');
     echo json_encode($data, JSON_UNESCAPED_UNICODE);
@@ -72,7 +138,7 @@ function paginate(int $total, int $page, int $perPage): array
 
 function siteName(): string
 {
-    return Setting::get('site_name', config('app_name')) ?? (string)config('app_name');
+    return \App\Models\Setting::get('site_name', config('app_name')) ?? (string)config('app_name');
 }
 
 function validDate(string $value): bool

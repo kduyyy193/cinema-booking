@@ -45,7 +45,8 @@ if (-not (Select-String -Path $hosts -Pattern "\s$([regex]::Escape($domain))(\s|
 $confD = Join-Path $NginxDir 'conf\conf.d'
 New-Item -ItemType Directory -Force $confD | Out-Null
 $tpl = Get-Content (Join-Path $PSScriptRoot 'nginx\cinebooking.conf') -Raw
-$tpl.Replace('{{CERT_DIR}}', $certDir.Replace('\', '/')) | Set-Content (Join-Path $confD 'cinebooking.conf') -Encoding ASCII
+$projectDir = (Split-Path $PSScriptRoot -Parent).Replace('\', '/')
+$tpl.Replace('{{CERT_DIR}}', $certDir.Replace('\', '/')).Replace('{{PROJECT_DIR}}', $projectDir) | Set-Content (Join-Path $confD 'cinebooking.conf') -Encoding ASCII
 & $nginx -p "$NginxDir\" -t
 if (Get-Process nginx -ErrorAction SilentlyContinue) { & $nginx -p "$NginxDir\" -s reload }
 else { Start-Process $nginx -ArgumentList '-p', "$NginxDir\" -WindowStyle Hidden -WorkingDirectory $NginxDir }
