@@ -75,7 +75,7 @@ function validateMovieData(array $in): array
     }
     if (!$genreIds) {
         $errors['genre_ids'] = 'Chọn ít nhất một thể loại.';
-    } elseif (count(Genre::existingIds($genreIds)) !== count(array_unique($genreIds))) {
+    } elseif (count(\App\Models\Genre::existingIds($genreIds)) !== count(array_unique($genreIds))) {
         $errors['genre_ids'] = 'Có thể loại không tồn tại.';
     }
 

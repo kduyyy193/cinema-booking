@@ -1,6 +1,26 @@
 <?php
 declare(strict_types=1);
 
+use App\Controllers\Admin\AdminBookingController;
+use App\Controllers\Admin\AdminCinemaController;
+use App\Controllers\Admin\AdminDashboardController;
+use App\Controllers\Admin\AdminGenreController;
+use App\Controllers\Admin\AdminMovieController;
+use App\Controllers\Admin\AdminReportController;
+use App\Controllers\Admin\AdminRoomController;
+use App\Controllers\Admin\AdminSeatController;
+use App\Controllers\Admin\AdminSettingsController;
+use App\Controllers\Admin\AdminShowtimeController;
+use App\Controllers\Admin\AdminUserController;
+use App\Controllers\AuthController;
+use App\Controllers\BookingController;
+use App\Controllers\MovieController;
+use App\Controllers\PaymentController;
+use App\Controllers\ProfileController;
+use App\Controllers\ShowtimeController;
+use App\Controllers\TicketController;
+use App\Controllers\WebhookController;
+
 return [
     ['GET', '/', [MovieController::class, 'home']],
     ['GET', '/movies', [MovieController::class, 'index']],
@@ -27,6 +47,7 @@ return [
     ['POST', '/payment/process-demo', [PaymentController::class, 'processDemo']],
     ['POST', '/payment/simulate-qr', [PaymentController::class, 'simulateQr']],
     ['GET', '/payment/status', [PaymentController::class, 'status']],
+    ['GET', '/payment/stream', [PaymentController::class, 'stream']],
     ['GET', '/payment/success', [PaymentController::class, 'success']],
     ['POST', '/webhooks/mock-payment', [WebhookController::class, 'mockPayment']],
 

@@ -1,0 +1,28 @@
+{
+    "name": "cinebooking/app",
+    "description": "CineBooking - website dat ve xem phim truc tuyen (PHP, PDO, SQLite, MVC)",
+    "type": "project",
+    "require": {
+        "php": ">=8.1",
+        "ext-pdo_sqlite": "*",
+        "ext-mbstring": "*",
+        "ext-fileinfo": "*"
+    },
+    "autoload": {
+        "psr-4": {
+            "App\\": "app/"
+        },
+        "files": [
+            "app/helpers/response.php",
+            "app/helpers/csrf.php",
+            "app/helpers/auth.php",
+            "app/helpers/labels.php",
+            "app/helpers/validation.php",
+            "app/helpers/payment.php",
+            "app/helpers/upload.php"
+        ]
+    },
+    "config": {
+        "optimize-autoloader": true
+    }
+}

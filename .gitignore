@@ -1,3 +1,4 @@
+/vendor
 storage/cinema.sqlite
 storage/cinema.sqlite-wal
 storage/cinema.sqlite-shm
